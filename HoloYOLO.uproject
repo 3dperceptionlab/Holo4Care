@@ -68,6 +68,10 @@
 				"HoloLens",
 				"Android"
 			]
+		},
+		{
+			"Name": "UXToolsExamples",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
