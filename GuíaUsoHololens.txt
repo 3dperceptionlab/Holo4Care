@@ -1,0 +1,7 @@
+Para acceder a Windows Device Portal de las Hololens 2:
+
+Se utiliza la ip privada del dispositivo através de WiFi o localhost si está conectado por cable.
+Los datos de acceso son los siguientes:
+
+-Usuario: 3DPLab
+-Contraseña: 3DPLabDTIC
