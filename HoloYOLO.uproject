@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.27",
+	"EngineAssociation": "{4E173A7A-4537-F842-2565-EC90F13404CF}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -55,11 +55,6 @@
 			]
 		},
 		{
-			"Name": "MrtkHub",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/211d009f26e943f19f41bbbaff9f273c"
-		},
-		{
 			"Name": "UXTools",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/f9f9cddaf5834ad1abeda49da34adf85",
@@ -75,6 +70,7 @@
 		}
 	],
 	"TargetPlatforms": [
-		"HoloLens"
+		"HoloLens",
+		"WindowsNoEditor"
 	]
 }
