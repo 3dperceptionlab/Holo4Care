@@ -10,6 +10,8 @@
 #include "ImageUtils.h"
 #include "Serialization/BufferArchive.h"
 #include "CoreMinimal.h"
+#include "Containers/Queue.h"
+#include "PredictionObject.h"
 #include "GameFramework/Actor.h"
 
 #define PSCREEN(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT(x));}
@@ -46,7 +48,14 @@ public:
 	int tries = 0;
 
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "Data")
-	TMap<int32, FString> JSONData;
+		TMap<int32, FString> JSONData;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		TQueue<FString> URLs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		int actualIteration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		TArray<APredictionObject*> predictionObjects;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -60,8 +69,13 @@ public:
 
 	// Callback to process response from the server
 	void OnResponseReceived(FHttpRequestPtr pRequest, FHttpResponsePtr pResponse, bool connectedSuccessfully);
-	void GetJSONItems(FString URLEndpoint);
-
+	
+	UFUNCTION(BlueprintCallable)
+		void GetJSONItems();
 	UFUNCTION(BlueprintCallable)
 		static void ProcessJSON(FString JSONSerialized, TArray<FVector2D>& itemPositions, TArray<FString>& itemNames, TArray<FString>& itemActions);
+	UFUNCTION(BlueprintCallable)
+		TArray<APredictionObject*> ProcessJSONtoObject(const FString JSONSerialized,int it);
+
+
 };

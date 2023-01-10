@@ -91,21 +91,21 @@ int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FStrin
 
 	auto end = std::chrono::steady_clock::now();
 	time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("1.toGetPNG Time: %f"), time));
 	}
 	UE_LOG(LogTemp, Display, TEXT("1.toGetPNG Time: %f"), time);
-
+	*/
 	start = std::chrono::steady_clock::now();
 	FImageUtils::ExportRenderTarget2DAsPNG(TextureRenderTarget, Buffer);
 
 	end = std::chrono::steady_clock::now();
 	time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("2.Image READED Time:%f N:%d"), time, Buffer.Num()));
 	}
 	UE_LOG(LogTemp, Display, TEXT("2.Image READED Time:%f N:%d"), time, Buffer.Num());
-
+	*/
 	start = std::chrono::steady_clock::now();
 	// First, we add the boundary for the file, which is different from text payload
 	/*FString FileBoundaryString = FString(TEXT("\r\n"))
@@ -156,64 +156,86 @@ int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FStrin
 
 	start = std::chrono::steady_clock::now();
 
-
 	return FileRawData.Num();
 
 }
 
-void AHTTPInterface::GetJSONItems(FString URLEndpoint) {
+void AHTTPInterface::GetJSONItems() {
 
-	UE_LOG(LogTemp, Display, TEXT("Getting: %s"), std::string(TCHAR_TO_UTF8(*URLEndpoint)).c_str());
-
-	FHttpModule& HttpModule = FHttpModule::Get();
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = HttpModule.CreateRequest();
-	HttpRequest->SetURL(URLEndpoint);
-	HttpRequest->SetVerb(TEXT("GET"));
-	HttpRequest->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
-	HttpRequest->SetHeader("Content-Type", TEXT("application/json"));
-	// Hook a lambda(anonymous function) to when we receive a response
-	//HttpRequest->OnProcessRequestComplete().BindUObject(this, &AHTTPInterface::OnResponseReceived);
-	HttpRequest->OnProcessRequestComplete().BindLambda(
-		[this](
-			FHttpRequestPtr pRequest,
-			FHttpResponsePtr pResponse,
-			bool connectedSuccessfully) mutable {
-			
-	if (connectedSuccessfully) {
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
+	if (!URLs.IsEmpty()) {
+		FString url = FString();
+		URLs.Peek(url);
+		UE_LOG(LogTemp, Display, TEXT("Getting: %s"), *url);
 		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Getting: %s"), *url));
 		}
-		switch (pResponse->GetResponseCode()) {
-			case EHttpResponseCodes::Ok:
-				JSONData.Add(20, pResponse->GetContentAsString());
-				UE_LOG(LogTemp, Display, TEXT("JSON Data added"));
-				break;
-			case EHttpResponseCodes::NotFound:
-				UE_LOG(LogTemp, Error, TEXT("ID doesn't exist"));
-				PSCREENE("ID doesn't exist");
-				break;
-			default:
-				UE_LOG(LogTemp, Display, TEXT("Connection."));
+		FHttpModule& HttpModule = FHttpModule::Get();
+		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = HttpModule.CreateRequest();
+		HttpRequest->SetURL(*url);
+		HttpRequest->SetVerb(TEXT("GET"));
+		HttpRequest->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
+		HttpRequest->SetHeader("Content-Type", TEXT("application/json"));
+		// Hook a lambda(anonymous function) to when we receive a response
+		//HttpRequest->OnProcessRequestComplete().BindUObject(this, &AHTTPInterface::OnResponseReceived);
+		HttpRequest->OnProcessRequestComplete().BindLambda(
+			[this](
+				FHttpRequestPtr pRequest,
+				FHttpResponsePtr pResponse,
+				bool connectedSuccessfully) mutable {
 
-			
-			//GetJSONItems(getURL); if 101 retry
-		}
+					if (connectedSuccessfully) {
+						UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
+						if (GEngine) {
+							GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+						}
+						FJsonSerializableArray fJSONSerial;
+						pResponse->GetURL().ParseIntoArray(fJSONSerial, TEXT("/"));
+						int id = FCString::Atoi(*fJSONSerial.Top());
 
-	}else {
-		switch (pRequest->GetStatus()) {
-		case EHttpRequestStatus::Failed_ConnectionError:
-			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
-			PSCREENE("Connection failed.");
-		default:
-			UE_LOG(LogTemp, Error, TEXT("Request failed."));
-			PSCREENE("Request failed.");
-		}
+						switch (pResponse->GetResponseCode()) {
+						case EHttpResponseCodes::Ok:
+
+						
+							predictionObjects = ProcessJSONtoObject(pResponse->GetContentAsString(),id);
+							URLs.Pop();
+							GetJSONItems();
+
+							//JSONData.Add(20, pResponse->GetContentAsString());
+							UE_LOG(LogTemp, Display, TEXT("JSON Data added"));
+							break;
+						case EHttpResponseCodes::NotFound:
+							UE_LOG(LogTemp, Error, TEXT("ID doesn't exist"));
+							PSCREENE("ID doesn't exist");
+							break;
+						case EHttpResponseCodes::ServiceUnavail:
+							UE_LOG(LogTemp, Error, TEXT("ID processing"));
+							PSCREENE("ID processing");
+							break;
+
+						default:
+							UE_LOG(LogTemp, Display, TEXT("Connection."));
+
+
+							//GetJSONItems(getURL); if 101 retry
+						}
+
+					}
+					else {
+						switch (pRequest->GetStatus()) {
+						case EHttpRequestStatus::Failed_ConnectionError:
+							UE_LOG(LogTemp, Error, TEXT("Connection failed."));
+							PSCREENE("Connection failed.");
+						default:
+							UE_LOG(LogTemp, Error, TEXT("Request failed."));
+							PSCREENE("Request failed.");
+						}
+					}
+			});
+
+		// Send the request 
+		HttpRequest->ProcessRequest();
+
 	}
-	});
-
-	// Send the request 
-	HttpRequest->ProcessRequest();
 }
 
 
@@ -232,8 +254,8 @@ void AHTTPInterface::OnResponseReceived(FHttpRequestPtr pRequest, FHttpResponseP
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(pResponse->GetContentAsString());
 		if (FJsonSerializer::Deserialize(Reader, JsonValue)) {
 			FString getURL = JsonValue->AsObject()->GetStringField("get");
-			GetJSONItems(getURL);
-
+			//GetJSONItems(getURL);
+			URLs.Enqueue(getURL);
 		}
 		else {
 			UE_LOG(LogTemp, Error, TEXT("Failed Deserializing json."));
@@ -258,7 +280,8 @@ void AHTTPInterface::OnResponseReceived(FHttpRequestPtr pRequest, FHttpResponseP
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("4.ResponseReceived Time:%f"), time));
 	}
-	UE_LOG(LogTemp, Error, TEXT("4.ResponseReceived Time:%f"), time);
+
+	UE_LOG(LogTemp, Display, TEXT("4.ResponseReceived Time:%f"), time);
 
 	start = std::chrono::steady_clock::now();
 }
@@ -288,5 +311,58 @@ void AHTTPInterface::ProcessJSON(FString JSONSerialized, TArray<FVector2D>& item
 	}
 
 }
+
+TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSONSerialized, int it) {
+	TArray<APredictionObject*> predictionObjectsFunc;
+	TSharedPtr<FJsonValue> JsonValue;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JSONSerialized);
+	UE_LOG(LogTemp, Display, TEXT("ProcessJSONtoObject %d"),it);
+
+	// Deserialize the json data given Reader and the actual object to deserialize
+	if (FJsonSerializer::Deserialize(Reader, JsonValue)) {
+		// Get the value of the json object by field name
+		auto items = JsonValue->AsObject()->GetArrayField("data");
+		for (auto& item : items) {
+			FActorSpawnParameters SpawnInfo = FActorSpawnParameters();
+			if (GEngine->GetCurrentPlayWorld()) {
+				UE_LOG(LogTemp, Display, TEXT("Spawning actor"));
+				if (GEngine) {
+					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Spawning actor")));
+				}
+				APredictionObject* predictionObject = GEngine->GetCurrentPlayWorld()->SpawnActor< APredictionObject>(SpawnInfo);
+				UE_LOG(LogTemp, Display, TEXT("Finished Spawning actor"));
+				if (GEngine) {
+					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Finished Spawning actor")));
+				}
+
+				predictionObject->xmax = item.Get()->AsObject()->GetNumberField("xmax");
+				predictionObject->xmin = item.Get()->AsObject()->GetNumberField("xmin");
+				predictionObject->x = (predictionObject->xmax + predictionObject->xmin) / 2;
+
+				predictionObject->ymax = item.Get()->AsObject()->GetNumberField("ymax");
+				predictionObject->ymin = item.Get()->AsObject()->GetNumberField("ymin");
+				predictionObject->y = (predictionObject->xmax + predictionObject->ymin) / 2;
+
+				predictionObject->className = FString(item.Get()->AsObject()->GetStringField("class"));
+
+				for (auto& action : item.Get()->AsObject()->GetArrayField("actions")) {
+					predictionObject->actions.Add(FString(action->AsString()));
+				}
+				predictionObject->ConfigNode();
+				predictionObjectsFunc.Add(predictionObject);
+			}
+			else {
+				UE_LOG(LogTemp, Error, TEXT("No world found"));
+			//	return;
+			}
+			
+		}
+		
+		actualIteration = it;
+
+	}
+	return predictionObjectsFunc;
+}
+
 
 

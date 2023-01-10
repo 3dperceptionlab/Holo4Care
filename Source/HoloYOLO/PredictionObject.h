@@ -1,0 +1,49 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include <string>
+#include "GameFramework/Actor.h"
+//#include "HoloLensARFunctionLibrary.h"
+//#include "ARBlueprintLibrary.h"
+#include "Components/TextRenderComponent.h"
+#include "PredictionObject.generated.h"
+
+
+
+UCLASS()
+class HOLOYOLO_API APredictionObject : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	APredictionObject();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	void ConfigNode();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		TArray<FString> actions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FString className;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float x;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float y;
+
+		float xmin, xmax, ymin, ymax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UStaticMeshComponent* node;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UTextRenderComponent* text;
+
+};
