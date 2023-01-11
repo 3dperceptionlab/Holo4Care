@@ -20,6 +20,8 @@ class HOLOYOLO_API APredictionObject : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APredictionObject();
+	~APredictionObject();
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,6 +30,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+		FVector GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordinate, FTransform transform);
 
 	void ConfigNode();
 
@@ -41,6 +46,8 @@ public:
 		float y;
 
 		float xmin, xmax, ymin, ymax;
+
+		USceneComponent* SceneRoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UStaticMeshComponent* node;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

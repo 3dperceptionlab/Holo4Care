@@ -195,7 +195,7 @@ void AHTTPInterface::GetJSONItems() {
 						switch (pResponse->GetResponseCode()) {
 						case EHttpResponseCodes::Ok:
 
-						
+							predictionObjects.Empty();
 							predictionObjects = ProcessJSONtoObject(pResponse->GetContentAsString(),id);
 							URLs.Pop();
 							GetJSONItems();
@@ -355,6 +355,7 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 				UE_LOG(LogTemp, Error, TEXT("No world found"));
 			//	return;
 			}
+
 			
 		}
 		

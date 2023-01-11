@@ -1,11 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PredictionObject.h"
+
+#pragma warning(disable:4668)  
+#include <DirectXMath.h>
+#pragma warning(default:4668)
+#include "MixedRealityInterop.h"
+//#include "WindowsMixedRealityInteropUtility.h"
+#include "ARBlueprintLibrary.h"
+
+#include "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARFunctionLibrary.h"
+#include "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARSystem.h"
+//#include "HoloLensARSystem.h"
 
 // Sets default values
 APredictionObject::APredictionObject()
 {
+	
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("ParentNode"));
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	x, xmax, xmin, y, ymin, ymax = 0;
@@ -14,7 +26,20 @@ APredictionObject::APredictionObject()
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
 	node = CreateDefaultSubobject<UStaticMeshComponent>(nameStr.c_str());
 	node->SetStaticMesh(sphere.Object);
+	node->SetupAttachment(SceneRoot);
 
+	text = CreateAbstractDefaultSubobject<UTextRenderComponent>("text");
+	text->SetText(nameStr.c_str());
+	text->SetTextRenderColor(FColor(150, 150, 150));
+	text->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+	text->SetRelativeLocation(FVector(0, 0, 20));
+	text->SetRelativeScale3D(FVector(0.3,0.3,0.3));
+	text->SetupAttachment(SceneRoot);
+
+}
+
+APredictionObject::~APredictionObject() {
+	K2_DestroyActor();
 
 }
 
@@ -38,7 +63,12 @@ void APredictionObject::ConfigNode() {
 
 	//SetActorLocation(FVector(0, 0, 0));
 	node->SetRelativeLocation(FVector(0, 0, 0));
-	node->SetRelativeScale3D(FVector(0.1, 0.1, 0.1));
+	node->SetRelativeScale3D(FVector(0.06, 0.06, 0.06));
+
+	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
+	text->SetText(nameStr.c_str());
+
+	
 	//text->SetText(className);
 	//text->SetRelativeLocation(FVector(0, 0, 20));
 	//node->SetupAttachment(NodeScene);
@@ -56,5 +86,55 @@ void APredictionObject::ConfigNode() {
 
 	}*/
 
+}
+
+
+/*FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D pixelCoordinate)
+{
+	//std::lock_guard<std::recursive_mutex> lock(RefsLock);
+	//if (CameraIntrinsics == nullptr)
+	//{
+	//	return FVector::ZeroVector;
+	//}
+
+	//auto unprojectedPointAtUnitDepth = CameraIntrinsics.UnprojectAtUnitDepth();
+
+	//FVector ray = WMRUtility::FromFloat3(
+	//	winrt::Windows::Foundation::Numerics::float3(
+	//		unprojectedPointAtUnitDepth,
+	//		-1.0f // Unprojection happened at 1 meter
+	//	)
+	//	, XRTrackingSystem->GetWorldToMetersScale());
+
+	//ray.Normalize();
+
+	//return PVCameraToWorldMatrix.TransformVector(ray);
+	return FVector(0, 0,0);
+}*/
+FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordinate, FTransform transform){
+
+	CameraImageCapture& CameraCapture = CameraImageCapture::Get();
+
+	DirectX::XMFLOAT2 CameraPoint = DirectX::XMFLOAT2(PixelCoordinate.X, PixelCoordinate.Y);
+	DirectX::XMFLOAT2 UnprojectedPointAtUnitDepth = CameraCapture.UnprojectPVCamPointAtUnitDepth(CameraPoint);
+
+	/*FVector Ray = WindowsMixedReality::WMRUtility::FromMixedRealityVector(
+		DirectX::XMFLOAT3(
+			UnprojectedPointAtUnitDepth.x,
+			UnprojectedPointAtUnitDepth.y,
+			-1.0f // Unprojection happened at 1 meter
+		)
+	) * 100.0f;*/
+
+	FVector Ray = FVector(
+		-1.0f * -1.0f,
+		UnprojectedPointAtUnitDepth.x,
+		UnprojectedPointAtUnitDepth.y) * 100.0f;
+
+	Ray.Normalize();
+
+	//FCriticalSection PVCamToWorldLock;
+	//FScopeLock sl(&PVCamToWorldLock);
+	return transform.TransformVector(Ray);
 }
 

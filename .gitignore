@@ -57,6 +57,7 @@ Build/*
 !Build/*/
 Build/*/**
 !Build/*/PakBlacklist*.txt
+Executable/*
 
 # Built data for maps
 *_BuiltData.uasset

@@ -31,15 +31,6 @@
 			]
 		},
 		{
-			"Name": "MagicLeapPassableWorld",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin",
-				"Mac",
-				"Win64"
-			]
-		},
-		{
 			"Name": "WindowsMixedReality",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [

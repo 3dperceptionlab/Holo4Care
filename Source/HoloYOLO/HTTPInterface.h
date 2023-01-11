@@ -57,6 +57,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TArray<APredictionObject*> predictionObjects;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	//	TDoubleLinkedList<APredictionObject*> hola;
+
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Main function for upload
