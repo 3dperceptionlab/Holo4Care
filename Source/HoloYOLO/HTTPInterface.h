@@ -67,6 +67,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		int MakePost(UTextureRenderTarget2D* TextureRenderTarget, FString URLEndpoint, int id);
 
+	UFUNCTION(BlueprintCallable)
+		TArray<APredictionObject*> AddNewPredictionObjets(TArray<APredictionObject*> newObjects, TArray<APredictionObject*> allObjects);
 
 	// This is a function to add simple text fields to response
 	FString AddData(FString Name, FString Value);

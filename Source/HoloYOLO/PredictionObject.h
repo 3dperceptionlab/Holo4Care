@@ -44,8 +44,14 @@ public:
 		float x;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		float y;
-
-		float xmin, xmax, ymin, ymax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float xmin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float xmax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float ymin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float ymax;
 
 		USceneComponent* SceneRoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

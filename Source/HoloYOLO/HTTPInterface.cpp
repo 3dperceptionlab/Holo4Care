@@ -198,7 +198,8 @@ void AHTTPInterface::GetJSONItems() {
 							predictionObjects.Empty();
 							predictionObjects = ProcessJSONtoObject(pResponse->GetContentAsString(),id);
 							URLs.Pop();
-							GetJSONItems();
+							if(predictionObjects.Num()==0)
+								GetJSONItems();
 
 							//JSONData.Add(20, pResponse->GetContentAsString());
 							UE_LOG(LogTemp, Display, TEXT("JSON Data added"));
@@ -317,19 +318,28 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 	TSharedPtr<FJsonValue> JsonValue;
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JSONSerialized);
 	UE_LOG(LogTemp, Display, TEXT("ProcessJSONtoObject %d"),it);
-
+	
 	// Deserialize the json data given Reader and the actual object to deserialize
 	if (FJsonSerializer::Deserialize(Reader, JsonValue)) {
 		// Get the value of the json object by field name
 		auto items = JsonValue->AsObject()->GetArrayField("data");
 		for (auto& item : items) {
 			FActorSpawnParameters SpawnInfo = FActorSpawnParameters();
+			UWorld* world = nullptr;
 			if (GEngine->GetCurrentPlayWorld()) {
+				world = GEngine->GetCurrentPlayWorld();
+			}
+			else if (GetWorld()) {
+				world = GetWorld();
+			}
+
+			if (world != nullptr){
+
 				UE_LOG(LogTemp, Display, TEXT("Spawning actor"));
 				if (GEngine) {
 					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Spawning actor")));
 				}
-				APredictionObject* predictionObject = GEngine->GetCurrentPlayWorld()->SpawnActor< APredictionObject>(SpawnInfo);
+				APredictionObject* predictionObject = world->SpawnActor< APredictionObject>(SpawnInfo);
 				UE_LOG(LogTemp, Display, TEXT("Finished Spawning actor"));
 				if (GEngine) {
 					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Finished Spawning actor")));
@@ -341,7 +351,7 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 
 				predictionObject->ymax = item.Get()->AsObject()->GetNumberField("ymax");
 				predictionObject->ymin = item.Get()->AsObject()->GetNumberField("ymin");
-				predictionObject->y = (predictionObject->xmax + predictionObject->ymin) / 2;
+				predictionObject->y = (predictionObject->ymax + predictionObject->ymin) / 2;
 
 				predictionObject->className = FString(item.Get()->AsObject()->GetStringField("class"));
 
@@ -350,8 +360,8 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 				}
 				predictionObject->ConfigNode();
 				predictionObjectsFunc.Add(predictionObject);
-			}
-			else {
+
+			}else {
 				UE_LOG(LogTemp, Error, TEXT("No world found"));
 			//	return;
 			}
@@ -364,6 +374,61 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 	}
 	return predictionObjectsFunc;
 }
+
+TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredictionObject*> newObjects, TArray<APredictionObject*> allObjects) {
+
+	//TArray<APredictionObject*> finalArray;
+
+	for (APredictionObject* newObj : newObjects) {
+
+		float distance = 100;
+		int id = -1;
+		for (int i = 0; i < allObjects.Num();i++) {
+
+			if (newObj->className == allObjects[i]->className) {
+				float actualDistance = (allObjects[i]->GetActorLocation() - newObj->GetActorLocation()).Size();
+				if (actualDistance < distance) {
+					distance = actualDistance;
+					id = i;
+				}
+			}
+		}
+		if(false){
+		//if (id >= 0) {
+
+			newObj->SetActorLocation((newObj->GetActorLocation() + allObjects[id]->GetActorLocation()) / 2);
+			//delete allObjects[id];
+			allObjects.RemoveAt(id);
+			allObjects.Add(newObj);
+
+			//delete allObjects[id];
+			//allObjects[id] == nullptr;
+
+		}else {
+			allObjects.Add(newObj);
+
+		}
+
+	}
+
+	/*for (int i = 0; i < allObjects.Num(); i++) {
+		if (allObjects[i] != nullptr) {
+			finalArray.Add(allObjects[i]);
+		}
+	}*/
+	/*if (allObjects.Num() > 10) {
+		allObjects.RemoveAt(0, 10 - allObjects.Num(), true);
+		
+	}*/
+	while (allObjects.Num() > 10) {
+		allObjects.RemoveAt(0);
+	}
+
+
+	return allObjects;
+
+}
+
 
 
 

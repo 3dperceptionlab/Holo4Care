@@ -32,14 +32,20 @@ APredictionObject::APredictionObject()
 	text->SetText(nameStr.c_str());
 	text->SetTextRenderColor(FColor(150, 150, 150));
 	text->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-	text->SetRelativeLocation(FVector(0, 0, 20));
-	text->SetRelativeScale3D(FVector(0.3,0.3,0.3));
+	text->SetRelativeLocation(FVector(0, 0, 10));
+	text->SetRelativeScale3D(FVector(0.2,0.2,0.2));
 	text->SetupAttachment(SceneRoot);
 
 }
 
 APredictionObject::~APredictionObject() {
-	K2_DestroyActor();
+	/*if (node != nullptr) {
+		node->DestroyComponent();
+	}
+	if (text != nullptr) {
+		text->DestroyComponent();
+	}*/
+	//Destroy();
 
 }
 
@@ -89,28 +95,6 @@ void APredictionObject::ConfigNode() {
 }
 
 
-/*FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D pixelCoordinate)
-{
-	//std::lock_guard<std::recursive_mutex> lock(RefsLock);
-	//if (CameraIntrinsics == nullptr)
-	//{
-	//	return FVector::ZeroVector;
-	//}
-
-	//auto unprojectedPointAtUnitDepth = CameraIntrinsics.UnprojectAtUnitDepth();
-
-	//FVector ray = WMRUtility::FromFloat3(
-	//	winrt::Windows::Foundation::Numerics::float3(
-	//		unprojectedPointAtUnitDepth,
-	//		-1.0f // Unprojection happened at 1 meter
-	//	)
-	//	, XRTrackingSystem->GetWorldToMetersScale());
-
-	//ray.Normalize();
-
-	//return PVCameraToWorldMatrix.TransformVector(ray);
-	return FVector(0, 0,0);
-}*/
 FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordinate, FTransform transform){
 
 	CameraImageCapture& CameraCapture = CameraImageCapture::Get();
