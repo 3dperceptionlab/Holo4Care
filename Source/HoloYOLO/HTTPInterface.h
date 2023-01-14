@@ -57,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TArray<APredictionObject*> predictionObjects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FString actions;
+
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	//	TDoubleLinkedList<APredictionObject*> hola;
 

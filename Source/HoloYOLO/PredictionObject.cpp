@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PredictionObject.h"
-
+#include <regex>
 #pragma warning(disable:4668)  
 #include <DirectXMath.h>
 #pragma warning(default:4668)
@@ -9,9 +9,18 @@
 //#include "WindowsMixedRealityInteropUtility.h"
 #include "ARBlueprintLibrary.h"
 
-#include "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARFunctionLibrary.h"
+// "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARFunctionLibrary.h"
 #include "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARSystem.h"
-//#include "HoloLensARSystem.h"
+#include "HoloLensARSystem.h"
+
+
+std::string getCleanText(std::string text) {
+	text[0] = std::toupper(text[0]);
+	text = std::regex_replace(text, std::regex("_"), " ");
+	return text;
+}
+
+
 
 // Sets default values
 APredictionObject::APredictionObject()
@@ -22,7 +31,7 @@ APredictionObject::APredictionObject()
 	PrimaryActorTick.bCanEverTick = true;
 	x, xmax, xmin, y, ymin, ymax = 0;
 	className = "Default";
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> sphere(TEXT("StaticMesh'/Engine/VREditor/TransformGizmo/RotationHandleFull.RotationHandleFull'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> sphere(TEXT("StaticMesh'/Game/RotationHandleFull.RotationHandleFull'"));
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
 	node = CreateDefaultSubobject<UStaticMeshComponent>(nameStr.c_str());
 	node->SetStaticMesh(sphere.Object);
@@ -32,8 +41,8 @@ APredictionObject::APredictionObject()
 	text->SetText(nameStr.c_str());
 	text->SetTextRenderColor(FColor(150, 150, 150));
 	text->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-	text->SetRelativeLocation(FVector(0, 0, 10));
-	text->SetRelativeScale3D(FVector(0.2,0.2,0.2));
+	//text->SetRelativeLocation(FVector(0, 0, 0));
+	text->SetRelativeScale3D(FVector(0.12,0.12,0.12));
 	text->SetupAttachment(SceneRoot);
 
 }
@@ -56,6 +65,10 @@ void APredictionObject::BeginPlay()
 	
 }
 
+bool APredictionObject::destroy() {
+	return(Destroy());
+}
+
 // Called every frame
 void APredictionObject::Tick(float DeltaTime)
 {
@@ -72,7 +85,7 @@ void APredictionObject::ConfigNode() {
 	node->SetRelativeScale3D(FVector(0.06, 0.06, 0.06));
 
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
-	text->SetText(nameStr.c_str());
+	text->SetText(getCleanText(nameStr).c_str());
 
 	
 	//text->SetText(className);
@@ -121,4 +134,7 @@ FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordi
 	//FScopeLock sl(&PVCamToWorldLock);
 	return transform.TransformVector(Ray);
 }
+
+
+
 

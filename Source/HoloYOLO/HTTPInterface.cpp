@@ -368,6 +368,14 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 
 			
 		}
+		auto actionsData = JsonValue->AsObject()->GetArrayField("actions");
+		if (actionsData.Num() > 0) {
+			actions = "";
+			for (auto& action : actionsData) {
+				actions += (action->AsString()) + " ";
+			}
+
+		}
 		
 		actualIteration = it;
 
@@ -381,7 +389,11 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 
 	for (APredictionObject* newObj : newObjects) {
 
-		float distance = 100;
+		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 6000;
+		newObj->node->SetRelativeScale3D(FVector(0.05, 0.05 + nodeScale, 0.05 + nodeScale));
+		newObj->text->SetRelativeScale3D(FVector(0.12 + nodeScale / 2, 0.12 + nodeScale / 2, 0.12 + nodeScale / 2));
+
+		float distance = 20 + ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin))/4;
 		int id = -1;
 		for (int i = 0; i < allObjects.Num();i++) {
 
@@ -393,12 +405,15 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 				}
 			}
 		}
-		if(false){
-		//if (id >= 0) {
+		//if(false){
 
-			newObj->SetActorLocation((newObj->GetActorLocation() + allObjects[id]->GetActorLocation()) / 2);
+		if (id >= 0) {
+			newObj->SetActorLocation((newObj->GetActorLocation() + allObjects[id]->GetActorLocation())/2);
 			//delete allObjects[id];
-			allObjects.RemoveAt(id);
+			if (allObjects[id]->destroy()){
+				allObjects.RemoveAt(id);
+			}
+			
 			allObjects.Add(newObj);
 
 			//delete allObjects[id];
@@ -420,8 +435,10 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 		allObjects.RemoveAt(0, 10 - allObjects.Num(), true);
 		
 	}*/
-	while (allObjects.Num() > 10) {
-		allObjects.RemoveAt(0);
+	for(int i =0;i<10 && allObjects.Num() > 12;i++) {
+		if (allObjects[0]->destroy()) {
+			allObjects.RemoveAt(0);
+		}
 	}
 
 

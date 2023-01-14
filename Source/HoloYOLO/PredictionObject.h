@@ -30,6 +30,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	bool destroy();
 
 	UFUNCTION(BlueprintCallable)
 		FVector GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordinate, FTransform transform);
