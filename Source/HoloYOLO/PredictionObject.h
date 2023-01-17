@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include <string>
 #include "GameFramework/Actor.h"
-//#include "HoloLensARFunctionLibrary.h"
-//#include "ARBlueprintLibrary.h"
+#include <Controls/UxtPressableButtonComponent.h>
 #include "Components/TextRenderComponent.h"
 #include "PredictionObject.generated.h"
 
@@ -37,6 +36,13 @@ public:
 
 	void ConfigNode();
 
+	UFUNCTION()
+	void onButtonPressed();
+	UFUNCTION()
+	void onButtonBeginFocus();
+	UFUNCTION()
+	void onButtonEndFocus();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TArray<FString> actions;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -53,11 +59,17 @@ public:
 		float ymin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		float ymax;
+	bool visible = false;
 
 		USceneComponent* SceneRoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UStaticMeshComponent* node;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UTextRenderComponent* text;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UTextRenderComponent* actionsText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UTextRenderComponent* actionsText2;
 
+		UUxtPressableButtonComponent *UxtPressableButton;
 };

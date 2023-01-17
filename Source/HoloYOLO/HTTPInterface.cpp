@@ -389,11 +389,11 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 
 	for (APredictionObject* newObj : newObjects) {
 
-		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 6000;
+		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 8000;
 		newObj->node->SetRelativeScale3D(FVector(0.05, 0.05 + nodeScale, 0.05 + nodeScale));
 		newObj->text->SetRelativeScale3D(FVector(0.12 + nodeScale / 2, 0.12 + nodeScale / 2, 0.12 + nodeScale / 2));
 
-		float distance = 20 + ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin))/4;
+		float distance = 20 + ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin))/6;
 		int id = -1;
 		for (int i = 0; i < allObjects.Num();i++) {
 
@@ -409,6 +409,10 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 
 		if (id >= 0) {
 			newObj->SetActorLocation((newObj->GetActorLocation() + allObjects[id]->GetActorLocation())/2);
+			newObj->visible = allObjects[id]->visible;
+			newObj->actionsText->SetVisibility(newObj->visible);
+			newObj->actionsText2->SetVisibility(newObj->visible);
+
 			//delete allObjects[id];
 			if (allObjects[id]->destroy()){
 				allObjects.RemoveAt(id);

@@ -25,27 +25,62 @@ std::string getCleanText(std::string text) {
 // Sets default values
 APredictionObject::APredictionObject()
 {
-	
+	visible = false;
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("ParentNode"));
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	UxtPressableButton = CreateDefaultSubobject<UUxtPressableButtonComponent>("UxtButton");
+	FScriptDelegate delegate;
+	delegate.BindUFunction(this, FName("onButtonPressed"));
+	UxtPressableButton->OnButtonPressed.AddUnique(delegate);
+	FScriptDelegate delegate2;
+	delegate2.BindUFunction(this, FName("onButtonBeginFocus"));
+	UxtPressableButton->OnBeginFocus.AddUnique(delegate2);
+	FScriptDelegate delegate3;
+	delegate3.BindUFunction(this, FName("onButtonEndFocus"));
+	UxtPressableButton->OnEndFocus.AddUnique(delegate3);
+	UxtPressableButton->SetPushBehavior(EUxtPushBehavior::Compress);
+	UxtPressableButton->SetFrontFaceCollisionFraction(1);
+	UxtPressableButton->SetupAttachment(SceneRoot);
+
+
 	x, xmax, xmin, y, ymin, ymax = 0;
 	className = "Default";
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> sphere(TEXT("StaticMesh'/Game/RotationHandleFull.RotationHandleFull'"));
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
 	node = CreateDefaultSubobject<UStaticMeshComponent>(nameStr.c_str());
 	node->SetStaticMesh(sphere.Object);
-	node->SetupAttachment(SceneRoot);
+	node->SetupAttachment(UxtPressableButton);
 
-	text = CreateAbstractDefaultSubobject<UTextRenderComponent>("text");
+	text = CreateDefaultSubobject<UTextRenderComponent>("text");
 	text->SetText(nameStr.c_str());
-	text->SetTextRenderColor(FColor(150, 150, 150));
+	text->SetTextRenderColor(FColor(30, 30, 30, 0.5));
+	//text->SetTextRenderColor(FColor(150, 150, 150));
 	text->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
 	//text->SetRelativeLocation(FVector(0, 0, 0));
 	text->SetRelativeScale3D(FVector(0.12,0.12,0.12));
 	text->SetupAttachment(SceneRoot);
 
+	actionsText = CreateDefaultSubobject<UTextRenderComponent>("ActionText");
+	actionsText->SetTextRenderColor(FColor(25, 25, 25));
+	actionsText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+	actionsText->SetRelativeLocation(FVector(0, 0, -6));
+	actionsText->SetRelativeScale3D(FVector(0.10, 0.10, 0.10));
+	actionsText->SetupAttachment(SceneRoot);
+	actionsText->SetText(TEXT("None"));
+
+	actionsText2 = CreateDefaultSubobject<UTextRenderComponent>("ActionText2");
+	actionsText2->SetTextRenderColor(FColor(25, 25, 25));
+	actionsText2->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+	actionsText2->SetRelativeLocation(FVector(0, 0, -9));
+	actionsText2->SetRelativeScale3D(FVector(0.10, 0.10, 0.10));
+	actionsText2->SetupAttachment(SceneRoot);
+	actionsText2->SetText(TEXT(""));
 }
+
+
+
 
 APredictionObject::~APredictionObject() {
 	/*if (node != nullptr) {
@@ -87,7 +122,24 @@ void APredictionObject::ConfigNode() {
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
 	text->SetText(getCleanText(nameStr).c_str());
 
-	
+	if (actions.Num() > 0) {
+		FString actionsFText;
+		for (int i = 0; i < actions.Num() && i < 3 ; i++) {
+			actionsFText += actions[i] + " ";
+			
+		}
+		actionsText->SetText(actionsFText);
+		actionsFText = "";
+		for (int i = 3; i < actions.Num() && i < 5; i++) {
+			actionsFText += actions[i] + " ";
+		}
+		actionsText2->SetText(actionsFText);
+
+	}
+	actionsText->SetVisibility(visible);
+	actionsText2->SetVisibility(visible);
+
+
 	//text->SetText(className);
 	//text->SetRelativeLocation(FVector(0, 0, 20));
 	//node->SetupAttachment(NodeScene);
@@ -136,5 +188,36 @@ FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordi
 }
 
 
+void APredictionObject::onButtonPressed() {
+	UE_LOG(LogTemp, Display, TEXT("Button PRESSED"));
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Button PRESSED")));
+	}
+
+	visible = !visible;
+	actionsText->SetVisibility(visible);
+	actionsText2->SetVisibility(visible);
+
+
+}
+
+void APredictionObject::onButtonBeginFocus(){
+
+	node->SetVectorParameterValueOnMaterials("Color", FVector(0.1, 0.2, 0.4));
+	text->SetTextRenderColor(FColor(40, 80, 150, 0.8));
+	actionsText->SetTextRenderColor(FColor(25, 50, 100));
+	actionsText2->SetTextRenderColor(FColor(25, 50, 100));
+
+}
+
+void APredictionObject::onButtonEndFocus() {
+
+	node->SetVectorParameterValueOnMaterials("Color", FVector(0.08, 0.08, 0.08));
+	text->SetTextRenderColor(FColor(30, 30, 30, 0.5));
+	actionsText2->SetTextRenderColor(FColor(25, 25, 25));
+	actionsText->SetTextRenderColor(FColor(25, 25, 25));
+
+
+}
 
 
