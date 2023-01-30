@@ -52,7 +52,7 @@ FString AHTTPInterface::AddData(FString Name, FString Value) {
 int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FString URLEndpoint, int id){
 
 	float time = 0;
-	PSCREEN("0.Starting makePost. Time: 0");
+	//PSCREEN("0.Starting makePost. Time: 0");
 	UE_LOG(LogTemp, Display, TEXT("0.Starting makePost. Time: 0"));
 
 	start = std::chrono::steady_clock::now();
@@ -149,9 +149,9 @@ int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FStrin
 
 	end = std::chrono::steady_clock::now();
 	time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("3.Finish MakePOST Time:%f"), time));
-	}
+	}*/
 	UE_LOG(LogTemp, Display, TEXT("3.Finish MakePOST Time:%f"), time);
 
 	start = std::chrono::steady_clock::now();
@@ -166,9 +166,9 @@ void AHTTPInterface::GetJSONItems() {
 		FString url = FString();
 		URLs.Peek(url);
 		UE_LOG(LogTemp, Display, TEXT("Getting: %s"), *url);
-		if (GEngine) {
+		/*if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Getting: %s"), *url));
-		}
+		}*/
 		FHttpModule& HttpModule = FHttpModule::Get();
 		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = HttpModule.CreateRequest();
 		HttpRequest->SetURL(*url);
@@ -185,9 +185,9 @@ void AHTTPInterface::GetJSONItems() {
 
 					if (connectedSuccessfully) {
 						UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
-						if (GEngine) {
-							GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
-						}
+						//if (GEngine) {
+						//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+						//}
 						FJsonSerializableArray fJSONSerial;
 						pResponse->GetURL().ParseIntoArray(fJSONSerial, TEXT("/"));
 						int id = FCString::Atoi(*fJSONSerial.Top());
@@ -247,9 +247,9 @@ void AHTTPInterface::OnResponseReceived(FHttpRequestPtr pRequest, FHttpResponseP
 	if (connectedSuccessfully) {
 		
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
-		}
+		//if (GEngine) {
+		//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+		//}
 		
 		TSharedPtr<FJsonValue> JsonValue;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(pResponse->GetContentAsString());
@@ -335,15 +335,8 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 
 			if (world != nullptr){
 
-				UE_LOG(LogTemp, Display, TEXT("Spawning actor"));
-				if (GEngine) {
-					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Spawning actor")));
-				}
 				APredictionObject* predictionObject = world->SpawnActor< APredictionObject>(SpawnInfo);
-				UE_LOG(LogTemp, Display, TEXT("Finished Spawning actor"));
-				if (GEngine) {
-					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Finished Spawning actor")));
-				}
+			
 
 				predictionObject->xmax = item.Get()->AsObject()->GetNumberField("xmax");
 				predictionObject->xmin = item.Get()->AsObject()->GetNumberField("xmin");
@@ -389,9 +382,19 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 
 	for (APredictionObject* newObj : newObjects) {
 
-		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 8000;
+		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 1050000 * newObj->camDistance;
 		newObj->node->SetRelativeScale3D(FVector(0.05, 0.05 + nodeScale, 0.05 + nodeScale));
-		newObj->text->SetRelativeScale3D(FVector(0.12 + nodeScale / 2, 0.12 + nodeScale / 2, 0.12 + nodeScale / 2));
+		newObj->text->SetRelativeScale3D(FVector(0.12 + nodeScale / 1.5, 0.12 + nodeScale / 1.5, 0.12 + nodeScale / 1.5));
+		newObj->actionsText->SetRelativeScale3D(FVector(0.08 + nodeScale / 2, 0.08 + nodeScale / 2, 0.08 + nodeScale / 2));
+		newObj->actionsText2->SetRelativeScale3D(FVector(0.08 + nodeScale / 2, 0.08 + nodeScale / 2, 0.08 + nodeScale / 2));
+
+		if (nodeScale < 0.11) {
+			float upDistance = (0.05 + nodeScale) * 120;
+			//newObj->text->SetRelativeLocation(FVector(0, 0, upDistance));
+			newObj->actionsText->SetRelativeLocation(FVector(0, 0, upDistance ));
+			newObj->actionsText2->SetRelativeLocation(FVector(0, 0, upDistance +3));
+				
+		}
 
 		float distance = 20 + ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin))/6;
 		int id = -1;

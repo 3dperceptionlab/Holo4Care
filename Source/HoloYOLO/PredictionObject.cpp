@@ -45,7 +45,7 @@ APredictionObject::APredictionObject()
 	UxtPressableButton->SetupAttachment(SceneRoot);
 
 
-	x, xmax, xmin, y, ymin, ymax = 0;
+	x, xmax, xmin, y, ymin, ymax, camDistance = 0;
 	className = "Default";
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> sphere(TEXT("StaticMesh'/Game/RotationHandleFull.RotationHandleFull'"));
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
@@ -190,9 +190,9 @@ FVector APredictionObject::GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordi
 
 void APredictionObject::onButtonPressed() {
 	UE_LOG(LogTemp, Display, TEXT("Button PRESSED"));
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Button PRESSED")));
-	}
+	}*/
 
 	visible = !visible;
 	actionsText->SetVisibility(visible);

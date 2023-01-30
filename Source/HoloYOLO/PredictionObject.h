@@ -59,6 +59,9 @@ public:
 		float ymin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		float ymax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float camDistance;
+
 	bool visible = false;
 
 		USceneComponent* SceneRoot;
