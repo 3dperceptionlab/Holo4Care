@@ -6,7 +6,7 @@ of the HoloLens 2 and, an existing action estimation architecture
 based on the simultaneous detection of the hands and the objects
 in the current scene using YOLO.
 
-![HoloYOLO Pipeline](img/Pipeline.pdf)
+![HoloYOLO Pipeline](img/Pipeline.jpg)
 
 ## How to use  
 

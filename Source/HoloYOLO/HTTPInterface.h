@@ -57,12 +57,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TArray<APredictionObject*> predictionObjects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		FString actions;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	//	TDoubleLinkedList<APredictionObject*> hola;
+
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Main function for upload
 	UFUNCTION(BlueprintCallable)
 		int MakePost(UTextureRenderTarget2D* TextureRenderTarget, FString URLEndpoint, int id);
 
+	UFUNCTION(BlueprintCallable)
+		TArray<APredictionObject*> AddNewPredictionObjets(TArray<APredictionObject*> newObjects, TArray<APredictionObject*> allObjects);
 
 	// This is a function to add simple text fields to response
 	FString AddData(FString Name, FString Value);

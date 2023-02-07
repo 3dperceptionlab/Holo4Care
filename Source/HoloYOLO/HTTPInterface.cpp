@@ -52,7 +52,7 @@ FString AHTTPInterface::AddData(FString Name, FString Value) {
 int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FString URLEndpoint, int id){
 
 	float time = 0;
-	PSCREEN("0.Starting makePost. Time: 0");
+	//PSCREEN("0.Starting makePost. Time: 0");
 	UE_LOG(LogTemp, Display, TEXT("0.Starting makePost. Time: 0"));
 
 	start = std::chrono::steady_clock::now();
@@ -149,9 +149,9 @@ int AHTTPInterface::MakePost(UTextureRenderTarget2D* TextureRenderTarget, FStrin
 
 	end = std::chrono::steady_clock::now();
 	time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	if (GEngine) {
+	/*if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("3.Finish MakePOST Time:%f"), time));
-	}
+	}*/
 	UE_LOG(LogTemp, Display, TEXT("3.Finish MakePOST Time:%f"), time);
 
 	start = std::chrono::steady_clock::now();
@@ -166,9 +166,9 @@ void AHTTPInterface::GetJSONItems() {
 		FString url = FString();
 		URLs.Peek(url);
 		UE_LOG(LogTemp, Display, TEXT("Getting: %s"), *url);
-		if (GEngine) {
+		/*if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Getting: %s"), *url));
-		}
+		}*/
 		FHttpModule& HttpModule = FHttpModule::Get();
 		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = HttpModule.CreateRequest();
 		HttpRequest->SetURL(*url);
@@ -185,9 +185,9 @@ void AHTTPInterface::GetJSONItems() {
 
 					if (connectedSuccessfully) {
 						UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
-						if (GEngine) {
-							GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
-						}
+						//if (GEngine) {
+						//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+						//}
 						FJsonSerializableArray fJSONSerial;
 						pResponse->GetURL().ParseIntoArray(fJSONSerial, TEXT("/"));
 						int id = FCString::Atoi(*fJSONSerial.Top());
@@ -195,10 +195,11 @@ void AHTTPInterface::GetJSONItems() {
 						switch (pResponse->GetResponseCode()) {
 						case EHttpResponseCodes::Ok:
 
-						
+							predictionObjects.Empty();
 							predictionObjects = ProcessJSONtoObject(pResponse->GetContentAsString(),id);
 							URLs.Pop();
-							GetJSONItems();
+							if(predictionObjects.Num()==0)
+								GetJSONItems();
 
 							//JSONData.Add(20, pResponse->GetContentAsString());
 							UE_LOG(LogTemp, Display, TEXT("JSON Data added"));
@@ -246,9 +247,9 @@ void AHTTPInterface::OnResponseReceived(FHttpRequestPtr pRequest, FHttpResponseP
 	if (connectedSuccessfully) {
 		
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *pResponse->GetContentAsString());
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
-		}
+		//if (GEngine) {
+		//	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Response: %s"), *pResponse->GetContentAsString()));
+		//}
 		
 		TSharedPtr<FJsonValue> JsonValue;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(pResponse->GetContentAsString());
@@ -317,23 +318,25 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 	TSharedPtr<FJsonValue> JsonValue;
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JSONSerialized);
 	UE_LOG(LogTemp, Display, TEXT("ProcessJSONtoObject %d"),it);
-
+	
 	// Deserialize the json data given Reader and the actual object to deserialize
 	if (FJsonSerializer::Deserialize(Reader, JsonValue)) {
 		// Get the value of the json object by field name
 		auto items = JsonValue->AsObject()->GetArrayField("data");
 		for (auto& item : items) {
 			FActorSpawnParameters SpawnInfo = FActorSpawnParameters();
+			UWorld* world = nullptr;
 			if (GEngine->GetCurrentPlayWorld()) {
-				UE_LOG(LogTemp, Display, TEXT("Spawning actor"));
-				if (GEngine) {
-					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Spawning actor")));
-				}
-				APredictionObject* predictionObject = GEngine->GetCurrentPlayWorld()->SpawnActor< APredictionObject>(SpawnInfo);
-				UE_LOG(LogTemp, Display, TEXT("Finished Spawning actor"));
-				if (GEngine) {
-					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Finished Spawning actor")));
-				}
+				world = GEngine->GetCurrentPlayWorld();
+			}
+			else if (GetWorld()) {
+				world = GetWorld();
+			}
+
+			if (world != nullptr){
+
+				APredictionObject* predictionObject = world->SpawnActor< APredictionObject>(SpawnInfo);
+			
 
 				predictionObject->xmax = item.Get()->AsObject()->GetNumberField("xmax");
 				predictionObject->xmin = item.Get()->AsObject()->GetNumberField("xmin");
@@ -341,7 +344,7 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 
 				predictionObject->ymax = item.Get()->AsObject()->GetNumberField("ymax");
 				predictionObject->ymin = item.Get()->AsObject()->GetNumberField("ymin");
-				predictionObject->y = (predictionObject->xmax + predictionObject->ymin) / 2;
+				predictionObject->y = (predictionObject->ymax + predictionObject->ymin) / 2;
 
 				predictionObject->className = FString(item.Get()->AsObject()->GetStringField("class"));
 
@@ -350,12 +353,21 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 				}
 				predictionObject->ConfigNode();
 				predictionObjectsFunc.Add(predictionObject);
-			}
-			else {
+
+			}else {
 				UE_LOG(LogTemp, Error, TEXT("No world found"));
 			//	return;
 			}
+
 			
+		}
+		auto actionsData = JsonValue->AsObject()->GetArrayField("actions");
+		if (actionsData.Num() > 0) {
+			actions = "";
+			for (auto& action : actionsData) {
+				actions += (action->AsString()) + " ";
+			}
+
 		}
 		
 		actualIteration = it;
@@ -363,6 +375,84 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 	}
 	return predictionObjectsFunc;
 }
+
+TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredictionObject*> newObjects, TArray<APredictionObject*> allObjects) {
+
+	//TArray<APredictionObject*> finalArray;
+
+	for (APredictionObject* newObj : newObjects) {
+
+		float nodeScale = ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin)) / 1050000 * newObj->camDistance;
+		newObj->node->SetRelativeScale3D(FVector(0.05, 0.05 + nodeScale, 0.05 + nodeScale));
+		newObj->text->SetRelativeScale3D(FVector(0.12 + nodeScale / 1.5, 0.12 + nodeScale / 1.5, 0.12 + nodeScale / 1.5));
+		newObj->actionsText->SetRelativeScale3D(FVector(0.08 + nodeScale / 2, 0.08 + nodeScale / 2, 0.08 + nodeScale / 2));
+		newObj->actionsText2->SetRelativeScale3D(FVector(0.08 + nodeScale / 2, 0.08 + nodeScale / 2, 0.08 + nodeScale / 2));
+
+		if (nodeScale < 0.11) {
+			float upDistance = (0.05 + nodeScale) * 120;
+			//newObj->text->SetRelativeLocation(FVector(0, 0, upDistance));
+			newObj->actionsText->SetRelativeLocation(FVector(0, 0, upDistance ));
+			newObj->actionsText2->SetRelativeLocation(FVector(0, 0, upDistance +3));
+				
+		}
+
+		float distance = 20 + ((newObj->xmax - newObj->xmin) + (newObj->ymax - newObj->ymin))/6;
+		int id = -1;
+		for (int i = 0; i < allObjects.Num();i++) {
+
+			if (newObj->className == allObjects[i]->className) {
+				float actualDistance = (allObjects[i]->GetActorLocation() - newObj->GetActorLocation()).Size();
+				if (actualDistance < distance) {
+					distance = actualDistance;
+					id = i;
+				}
+			}
+		}
+		//if(false){
+
+		if (id >= 0) {
+			newObj->SetActorLocation((newObj->GetActorLocation() + allObjects[id]->GetActorLocation())/2);
+			newObj->visible = allObjects[id]->visible;
+			newObj->actionsText->SetVisibility(newObj->visible);
+			newObj->actionsText2->SetVisibility(newObj->visible);
+
+			//delete allObjects[id];
+			if (allObjects[id]->destroy()){
+				allObjects.RemoveAt(id);
+			}
+			
+			allObjects.Add(newObj);
+
+			//delete allObjects[id];
+			//allObjects[id] == nullptr;
+
+		}else {
+			allObjects.Add(newObj);
+
+		}
+
+	}
+
+	/*for (int i = 0; i < allObjects.Num(); i++) {
+		if (allObjects[i] != nullptr) {
+			finalArray.Add(allObjects[i]);
+		}
+	}*/
+	/*if (allObjects.Num() > 10) {
+		allObjects.RemoveAt(0, 10 - allObjects.Num(), true);
+		
+	}*/
+	for(int i =0;i<10 && allObjects.Num() > 12;i++) {
+		if (allObjects[0]->destroy()) {
+			allObjects.RemoveAt(0);
+		}
+	}
+
+
+	return allObjects;
+
+}
+
 
 
 

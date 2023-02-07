@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include <string>
 #include "GameFramework/Actor.h"
-//#include "HoloLensARFunctionLibrary.h"
-//#include "ARBlueprintLibrary.h"
+#include <Controls/UxtPressableButtonComponent.h>
 #include "Components/TextRenderComponent.h"
 #include "PredictionObject.generated.h"
 
@@ -20,6 +19,8 @@ class HOLOYOLO_API APredictionObject : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APredictionObject();
+	~APredictionObject();
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,8 +29,19 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	bool destroy();
+
+	UFUNCTION(BlueprintCallable)
+		FVector GetWorldSpaceRayFromCameraPoint(FVector2D PixelCoordinate, FTransform transform);
 
 	void ConfigNode();
+
+	UFUNCTION()
+	void onButtonPressed();
+	UFUNCTION()
+	void onButtonBeginFocus();
+	UFUNCTION()
+	void onButtonEndFocus();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		TArray<FString> actions;
@@ -39,11 +51,28 @@ public:
 		float x;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		float y;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float xmin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float xmax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float ymin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float ymax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		float camDistance;
 
-		float xmin, xmax, ymin, ymax;
+	bool visible = false;
+
+		USceneComponent* SceneRoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UStaticMeshComponent* node;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		UTextRenderComponent* text;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UTextRenderComponent* actionsText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+		UTextRenderComponent* actionsText2;
 
+		UUxtPressableButtonComponent *UxtPressableButton;
 };

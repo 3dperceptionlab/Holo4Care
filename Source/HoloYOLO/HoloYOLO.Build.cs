@@ -8,7 +8,7 @@ public class HoloYOLO : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HTTP" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HTTP","AugmentedReality","HoloLensAR","MixedRealityInteropLibrary", "WindowsMixedRealityInterop", "UXTools" });
 
 
         PrivateDependencyModuleNames.AddRange(new string[] { "Json", "JsonUtilities" });
