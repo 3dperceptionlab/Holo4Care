@@ -12,7 +12,9 @@
 #include "PythonAPI.generated.h"
 
 
-
+/// <summary>
+/// (MAYBE) NOT USED. Functions to access disk and save data to be processed by Python API (running locally)
+/// </summary>
 UCLASS()
 class HOLOYOLO_API UPythonAPI : public UBlueprintFunctionLibrary{
 	GENERATED_BODY()

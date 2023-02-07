@@ -14,6 +14,9 @@
 #define IP_ADDR "172.16.34.101"
 #define _CRT_SECURE_NO_WARNINGS
 
+/// <summary>
+/// NOT USED. Class for TCP socket communication for sending serialized images.
+/// </summary>
 UCLASS()
 class HOLOYOLO_API ANetInterface : public AActor
 {

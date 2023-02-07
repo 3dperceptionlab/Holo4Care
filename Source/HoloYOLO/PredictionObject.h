@@ -10,7 +10,9 @@
 #include "PredictionObject.generated.h"
 
 
-
+/// <summary>
+/// Represents the detected objects
+/// </summary>
 UCLASS()
 class HOLOYOLO_API APredictionObject : public AActor
 {
