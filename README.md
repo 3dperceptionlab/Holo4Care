@@ -20,5 +20,5 @@ git clone https://github.com/3dperceptionlab/HoloYOLO.git
 ## Authors
 
 This project has been carried out as an end-of-degree project by:
-- David Mulero Pérez ([dmulero@dtic.ua.es](mailto:dmulero@dtic.ua.es))
-- Manu Benavent Lledó ([mbenavent@dtic.ua.es](mailto:mbenavent@dtic.ua.es))
+- David Mulero-Perez ([dmulero@dtic.ua.es](mailto:dmulero@dtic.ua.es))
+- Manuel Benavent-Lledo ([mbenavent@dtic.ua.es](mailto:mbenavent@dtic.ua.es))
