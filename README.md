@@ -17,6 +17,9 @@ First, install Unreal Engine 4, version 2.27 or upper.
 git clone https://github.com/3dperceptionlab/HoloYOLO.git
 ```
 
+Compile to generate Visual Studio solution files. To deploy in the device, generate the package and upload (.appxbundle) to the Mixed Reality Portal.
+If it is the first time, you will need to generate a key. To do so, in UE4, access Edit>Project Settings>Platform>HoloLens, in Packaging/Signing Certificate: Generate New.
+
 ## Authors
 
 This project has been carried out as an end-of-degree project by:
