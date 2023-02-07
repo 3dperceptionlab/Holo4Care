@@ -6,11 +6,7 @@
 #include <DirectXMath.h>
 #pragma warning(default:4668)
 #include "MixedRealityInterop.h"
-//#include "WindowsMixedRealityInteropUtility.h"
 #include "ARBlueprintLibrary.h"
-
-// "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARFunctionLibrary.h"
-#include "C:\Program Files\Epic Games\UE_4.27\Engine\Plugins\Runtime\WindowsMixedReality\Source\HoloLensAR\Public\HoloLensARSystem.h"
 #include "HoloLensARSystem.h"
 
 
