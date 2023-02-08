@@ -454,5 +454,49 @@ TArray<APredictionObject*> AHTTPInterface::AddNewPredictionObjets(TArray<APredic
 }
 
 
+void AHTTPInterface::GenerateTrackingDataJSON(TArray<FVector> gazePositions) {
+
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("GenerateTrackingDataJSON")));
+	}
+
+	FString JSONDataString;
+	TSharedPtr<FJsonObject> root = MakeShared<FJsonObject>();
+	TArray<TSharedPtr<FJsonValue>> arrayDataGaze;
+
+	for (const FVector& vec : gazePositions) {
+
+		TSharedPtr<FJsonObject> obj = MakeShared<FJsonObject>();
+		obj->SetNumberField("X", vec.X);
+		obj->SetNumberField("Y", vec.Y);
+		obj->SetNumberField("Z", vec.Z);
+		arrayDataGaze.Add(MakeShared<FJsonValueObject>(obj));
+
+	}
+
+	root->SetArrayField(TEXT("GazePositions"), arrayDataGaze);
+
+
+	TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&JSONDataString);
+	FJsonSerializer::Serialize(root.ToSharedRef(), Writer);
+
+
+
+	UE_LOG(LogTemp, Display, TEXT("Data: %s"), *JSONDataString);
+	//FString file = FPaths::ProjectPersistentDownloadDir();
+	FString file = FPaths::ProjectDir();
+	file.Append(TEXT("GazePositions.json"));
+	// We will use this FileManager to deal with the file.
+	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+	//if (FileManager.FileExists(*file)){
+	if (!FFileHelper::SaveStringToFile(JSONDataString, *file)) {
+		UE_LOG(LogTemp, Error, TEXT("Error saving GazePositions in: %s"));
+
+	}
+	//}
+
+	// UObject to String
+	//FJsonObjectConverter::UStructToJsonObjectString(GazePositions, JSONDataString);
+}
 
 

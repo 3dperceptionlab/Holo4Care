@@ -107,6 +107,14 @@ public:
 		TArray<APredictionObject*> AddNewPredictionObjets(TArray<APredictionObject*> newObjects, TArray<APredictionObject*> allObjects);
 
 	/// <summary>
+	/// This function creates a JSON from the GazePosition data
+	/// </summary>
+	/// <param name="gazePositions"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable)
+		void GenerateTrackingDataJSON(TArray<FVector> gazePositions);
+
+	/// <summary>
 	/// This function adds simple text fields to response
 	/// </summary>
 	/// <param name="Name"></param>
