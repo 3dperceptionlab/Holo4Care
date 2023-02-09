@@ -25,6 +25,8 @@
 > #### Failed to build "Saved\UATTempProj.proj":
 >
 > - Recompile (not just compile) AutomationTool Visual Studio project
-> 
 
+> #### Cooked asset failed
+> 
+> - To kill the plague that infected the Blueprint, you just have to make any change on that (you can just unpin something, and then pin again) and click the Compile button.
 
