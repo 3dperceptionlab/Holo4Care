@@ -17,5 +17,5 @@ class HOLOYOLO_API UQRManager : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-		static AQRObject* CreateQRObject(const UObject* WorldContextObject, FString qr_text, FGuid qr_guid, int32 qr_version);
+		static AQRObject* CreateQRObject(const UObject* WorldContextObject, FString qr_text, FGuid qr_guid, int32 qr_version, UStaticMesh* mesh);
 };

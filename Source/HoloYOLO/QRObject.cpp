@@ -15,6 +15,7 @@ AQRObject::AQRObject()
 	std::string nameStr = std::string(TCHAR_TO_UTF8(*className));
 	node = CreateDefaultSubobject<UStaticMeshComponent>(nameStr.c_str());
 	node->SetStaticMesh(sphere.Object);
+	//node->SetRelativeScale3D(FVector(0.05, 0.05, 0.05));
 	node->SetupAttachment(SceneRoot);
 }
 
@@ -36,6 +37,10 @@ void AQRObject::UpdateObjectPosition(FVector center, FVector extent, FRotator ro
 {
 	SetActorLocation(center);
 	SetActorRotation(rotation);
-	//SetActorScale3D(extent);
+	node->SetRelativeRotation(FRotator(-90, 0, 0));
+	float scale = (extent.Y + extent.Z)/50;
+	SetActorScale3D(FVector(scale,scale,scale));
+	
+
 }
 
