@@ -365,7 +365,7 @@ TArray<APredictionObject*> AHTTPInterface::ProcessJSONtoObject(const FString JSO
 		if (actionsData.Num() > 0) {
 			actions = "";
 			for (auto& action : actionsData) {
-				actions += (action->AsString()) + "\n";
+				actions += "\n" + (action->AsString());
 			}
 
 		}
