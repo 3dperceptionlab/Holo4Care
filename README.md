@@ -14,7 +14,7 @@ First, install Unreal Engine 4, version 2.27 or upper.
 
 ```bash
 # clone project   
-git clone https://github.com/3dperceptionlab/HoloYOLO.git
+git clone https://github.com/3dperceptionlab/Holo4Care.git
 ```
 
 Compile to generate Visual Studio solution files. To deploy in the device, generate the package and upload (.appxbundle and select "Allow me to select framework packages" and upload the .appx file) to the Mixed Reality Portal.
