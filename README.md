@@ -1,4 +1,4 @@
-# Holo YOLO
+# Holo4Care
 
 In this work, we propose an AR system for detecting early signs of dementia
 by recognizing human-object interactions with the combination
